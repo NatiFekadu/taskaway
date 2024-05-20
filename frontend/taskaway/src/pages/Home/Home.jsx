@@ -22,30 +22,6 @@ const Home = () => {
             onEdit={() => {}}
             onDelete={() => {}}
           />
-          <TaskCard
-            title="Go to the Jim"
-            date="7th aprill"
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
-          <TaskCard
-            title="Go to the Jim"
-            date="7th aprill"
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
-          <TaskCard
-            title="Go to the Jim"
-            date="7th aprill"
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
-          <TaskCard
-            title="Go to the Jim"
-            date="7th aprill"
-            onEdit={() => {}}
-            onDelete={() => {}}
-          />
         </div>
       </div>
       <button
@@ -66,7 +42,13 @@ const Home = () => {
         }}
         className="w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5"
       >
-        <AddEditTasks />
+        <AddEditTasks
+          type={openAddEditModal.type}
+          noteData={openAddEditModal.data}
+          onClose={() =>
+            setOpenAddEditModal({ isShown: false, type: "add", data: null })
+          }
+        />
       </Modal>
     </>
   );
