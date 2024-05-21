@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 mongoose.connect(config.connectionString);
 
 const User = require("./models/usermodel");
+const Task = require("./models/taskmodel");
 
 const express = require("express");
 const cors = require("cors");
@@ -113,6 +114,35 @@ app.post("/login", async (req, res) => {
       .json({ error: true, message: "Invalid Credentials" });
   }
 });
+
+// Add Task
+app.post("/add-task", authenticationToken, async (req, res) => {
+    const { title } = req.body;
+    const {user}= req.user;
+    if (!title) {
+      return res
+       .status(400)
+       .json({ error: true, message: "title is required" });
+    }
+   try{
+    const task = new Task({
+        title,
+        userId: user._id,
+    });
+    await task.save();
+    return res.json({
+        error: false,
+        message: "Task added successfully",
+        task,
+    });
+   } catch(error){
+    return res.sendStatus(500).json({
+        error: true,
+        message: "Internal Server Error",
+    });
+   }
+})
+
 
 app.listen(8000);
 
