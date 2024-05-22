@@ -113,6 +113,26 @@ app.post("/login", async (req, res) => {
       .json({ error: true, message: "Invalid Credentials" });
   }
 });
+// Get User
+app.get("/get-user", authenticationToken, async (req, res) => {
+  const { user } = req.user;
+
+  const isUser = await User.findOne({ _id: user._id });
+  if (!isUser) {
+    return res
+      .status(400)
+      .json({ error: true, message: "User does not exist" });
+  }
+  return res.json({
+    user: {
+      fullname: isUser.fullname,
+      email: isUser.email,
+      _Id: isUser._id,
+      createdOn: isUser.createdOn,
+    },
+    message: "",
+  });
+});
 
 // Add Task
 app.post("/add-task", authenticationToken, async (req, res) => {
@@ -195,7 +215,7 @@ app.get("/get-all-tasks/", authenticationToken, async (req, res) => {
 app.delete("/delete-task/:taskId", authenticationToken, async (req, res) => {
   const taskId = req.params.taskId;
   const { user } = req.user;
-  
+
   try {
     const task = await Task.findOne({ _id: taskId, userId: user._id });
     if (!task) {
