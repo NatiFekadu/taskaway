@@ -176,6 +176,25 @@ app.put("/edit-task/:taskId", authenticationToken, async (req, res) => {
     }
 })
 
+//Get All  Tasks
+app.get("/get-all-tasks/", authenticationToken, async (req, res) => {
+    const {user}= req.user;
+    try{
+        const tasks = await Task.find({userId:user._id});
+        return res.json({
+            error: false,
+             tasks,
+            message: "Tasks retrieved successfully",
+           
+        });
+    } catch(error){
+        return res.sendStatus(500).json({
+            error: true,
+            message: "Internal Server Error",
+        });
+    }
+})
+
 
 app.listen(8000);
 
