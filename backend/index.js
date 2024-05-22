@@ -106,7 +106,6 @@ app.post("/login", async (req, res) => {
       message: "Login Successful",
       email,
       accessToken,
-      
     });
   } else {
     return res
@@ -117,84 +116,101 @@ app.post("/login", async (req, res) => {
 
 // Add Task
 app.post("/add-task", authenticationToken, async (req, res) => {
-    const { title } = req.body;
-    const {user}= req.user;
-    if (!title) {
-      return res
-       .status(400)
-       .json({ error: true, message: "title is required" });
-    }
-   try{
+  const { title } = req.body;
+  const { user } = req.user;
+  if (!title) {
+    return res.status(400).json({ error: true, message: "title is required" });
+  }
+  try {
     const task = new Task({
-        title,
-        userId: user._id,
+      title,
+      userId: user._id,
     });
     await task.save();
     return res.json({
-        error: false,
-        message: "Task added successfully",
-        task,
+      error: false,
+      message: "Task added successfully",
+      task,
     });
-   } catch(error){
+  } catch (error) {
     return res.sendStatus(500).json({
-        error: true,
-        message: "Internal Server Error",
+      error: true,
+      message: "Internal Server Error",
     });
-   }
-})
+  }
+});
 
 //Edit Task
 app.put("/edit-task/:taskId", authenticationToken, async (req, res) => {
-    const taskId = req.params.taskId;
-    const { title } = req.body;
-    const {user}= req.user;
-    if (!title) {
-      return res
-       .status(400)
-       .json({ error: true, message: "No Changes Provided" });
+  const taskId = req.params.taskId;
+  const { title } = req.body;
+  const { user } = req.user;
+  if (!title) {
+    return res
+      .status(400)
+      .json({ error: true, message: "No Changes Provided" });
+  }
+  try {
+    const task = await Task.findOne({ _id: taskId, userId: user._id });
+    if (!task) {
+      return res.json({
+        error: true,
+        message: "Task does not exist",
+      });
     }
-    try{
-        const task = await Task.findOne({_id:taskId,userId:user._id});
-        if (!task) {
-            return res.json({
-                error: true,
-                message: "Task does not exist",
-            });
-        }
-         if(title) task.title=title;
-         await task.save();
-         return res.json({
-            error: false,
-            message: "Task edited successfully",
-            task,
-        });
-    } catch(error){
-        return res.sendStatus(500).json({
-            error: true,
-            message: "Internal Server Error",
-        });
-    }
-})
+    if (title) task.title = title;
+    await task.save();
+    return res.json({
+      error: false,
+      message: "Task edited successfully",
+      task,
+    });
+  } catch (error) {
+    return res.sendStatus(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 //Get All  Tasks
 app.get("/get-all-tasks/", authenticationToken, async (req, res) => {
-    const {user}= req.user;
-    try{
-        const tasks = await Task.find({userId:user._id});
-        return res.json({
-            error: false,
-             tasks,
-            message: "Tasks retrieved successfully",
-           
-        });
-    } catch(error){
-        return res.sendStatus(500).json({
-            error: true,
-            message: "Internal Server Error",
-        });
-    }
-})
+  const { user } = req.user;
+  try {
+    const tasks = await Task.find({ userId: user._id });
+    return res.json({
+      error: false,
+      tasks,
+      message: "Tasks retrieved successfully",
+    });
+  } catch (error) {
+    return res.sendStatus(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+});
 
+// Delete Task
+app.delete("/delete-task/:taskId", authenticationToken, async (req, res) => {
+  const taskId = req.params.taskId;
+  const { user } = req.user;
+  
+  try {
+    const task = await Task.findOne({ _id: taskId, userId: user._id });
+    if (!task) {
+      return res
+        .sendStatus(404)
+        .json({ error: true, message: "Task not found" });
+    }
+    await task.deleteOne({ _id: taskId, userId: user._id });
+    return res.json({ error: false, message: "Task deleted successfully" });
+  } catch (e) {
+    return res
+      .sendStatus(500)
+      .json({ error: true, message: "Internal Server Error" });
+  }
+});
 
 app.listen(8000);
 
